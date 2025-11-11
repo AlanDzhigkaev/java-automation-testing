@@ -17,7 +17,7 @@ public class refactor_7_lesson {
         String MonthOfBirthday = "April";
         String DayOfBithday = "19";
         String[] Subjects = {"Maths", "Chemistry"};
-        String[] Hobbies = {"Sports","Reading","Music"};
+        String[] Hobbies = {"Sports", "Reading", "Music"};
         String CurrentAddress = "testComment";
         String FileRoute = "C:/Users/alaniwe/Downloads/ChatGPT.png";
 
@@ -27,7 +27,7 @@ public class refactor_7_lesson {
                 .setEmail(Email)
                 .setGender(gender)
                 .setNumberOfPhone(NumberOfPhone)
-                .setBirthDate(YearOfBirthday,MonthOfBirthday,DayOfBithday)
+                .setBirthDate(YearOfBirthday, MonthOfBirthday, DayOfBithday)
                 .setSubject(Subjects[0])
                 .setSubject(Subjects[1])
                 .setHobbies(Hobbies[0])
@@ -37,7 +37,7 @@ public class refactor_7_lesson {
                 .setCurrentAddress(CurrentAddress)
                 .ScrollToElementAndClick("#state")
                 .ClickToElement("#react-select-3-option-0")
-                .InputAndEnter("#react-select-4-input","Noida")
+                .InputAndEnter("#react-select-4-input", "Noida")
                 .ClickToElement("#submit");
 
         // проверки на корректность данных
@@ -45,10 +45,11 @@ public class refactor_7_lesson {
                 .verifyResult("Student Email", Email)
                 .verifyResult("Gender", gender)
                 .verifyResult("Mobile", NumberOfPhone)
-                .verifyResult("Date of Birth", DayOfBithday+" "+MonthOfBirthday+","+YearOfBirthday)
-                .verifyResult("Subjects", Subjects[0]+", "+Subjects[1])
-                .verifyResult("Hobbies", Hobbies[0]+", "+Hobbies[1]+", "+Hobbies[2])
+                .verifyResult("Date of Birth", DayOfBithday + " " + MonthOfBirthday + "," + YearOfBirthday)
+                .verifyResult("Subjects", Subjects[0] + ", " + Subjects[1])
+                .verifyResult("Hobbies", Hobbies[0] + ", " + Hobbies[1] + ", " + Hobbies[2])
                 .verifyResult("Picture", "ChatGPT.png")
                 .verifyResult("Address", CurrentAddress)
                 .verifyResult("State and City", "NCR Noida");
+    }
 }
