@@ -10,7 +10,7 @@ import static com.codeborne.selenide.Selenide.$;
 import static com.codeborne.selenide.Selenide.open;
 import static com.codeborne.selenide.WebDriverRunner.getWebDriver;
 
-public class HomeWork {
+public class HomeWorkTest {
 
     @ParameterizedTest(name = "тест для домашней работы №1. @ValueSource. Имя = {0}")
     @ValueSource(strings = {"Alan","Timur","Vadim"})
@@ -54,7 +54,7 @@ public class HomeWork {
 
     @MethodSource()
     @ParameterizedTest(name = "тест для домашней работы №4. @MethodSource. Имя = {0}, фамилия = {1}, mail = {2}")
-    void TestMethodSource(String firstname, String lastname, String email){
+    void TestMethodSource(String firstname, String lastname, String Email){
         Configuration.holdBrowserOpen = true;
         Configuration.pageLoadStrategy = "eager";
         open("https://demoqa.com/automation-practice-form");
@@ -62,7 +62,7 @@ public class HomeWork {
 
         $("#firstName").setValue(firstname);
         $("#lastName").setValue(lastname);
-        $("#userEmail").setValue(email);
+        $("#userEmail").setValue(Email);
     }
 
     static Stream<Arguments> TestMethodSource(){
