@@ -54,7 +54,7 @@ public class HomeWorkTest {
 
     @MethodSource()
     @ParameterizedTest(name = "тест для домашней работы №4. @MethodSource. Имя = {0}, фамилия = {1}, mail = {2}")
-    void TestMethodSource(String firstname, String lastname, String Email){
+    void TestMethodSource(String firstname, String lastname, String email){
         Configuration.holdBrowserOpen = true;
         Configuration.pageLoadStrategy = "eager";
         open("https://demoqa.com/automation-practice-form");
@@ -62,7 +62,7 @@ public class HomeWorkTest {
 
         $("#firstName").setValue(firstname);
         $("#lastName").setValue(lastname);
-        $("#userEmail").setValue(Email);
+        $("#userEmail").setValue(email);
     }
 
     static Stream<Arguments> TestMethodSource(){
