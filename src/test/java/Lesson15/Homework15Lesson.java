@@ -2,7 +2,6 @@ package Lesson15;
 
 import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.logevents.SelenideLogger;
-import com.codeborne.selenide.selector.ByText;
 import com.github.javafaker.Faker;
 import io.qameta.allure.selenide.AllureSelenide;
 import org.junit.jupiter.api.DisplayName;
@@ -37,7 +36,7 @@ public class Homework15Lesson {
         String gender = "Female";
         String phoneNumber = ("7" + faker.phoneNumber().phoneNumber()
                 .replaceAll("[^0-9]", "")).substring(0, 10);
-        String[] dateOfBirth = {"April", "2001", "19"};
+        String[] dateOfBirth = {"April","2001","19"};
         String Subject = "Maths";
         String Hobbi = "Sports";
         String fileRoute = "C:/Users/alaniwe/Downloads/ChatGPT.png";
