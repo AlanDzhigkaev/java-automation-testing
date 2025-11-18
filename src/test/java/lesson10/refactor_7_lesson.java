@@ -1,6 +1,10 @@
 package lesson10;
 
-import org.junit.Test;
+import com.codeborne.selenide.logevents.SelenideLogger;
+import io.qameta.allure.Owner;
+import io.qameta.allure.selenide.AllureSelenide;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import pages.RegistrationPage;
 
 public class refactor_7_lesson {

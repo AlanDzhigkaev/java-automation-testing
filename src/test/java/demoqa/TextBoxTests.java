@@ -1,10 +1,8 @@
 package demoqa;
 
 import com.codeborne.selenide.Configuration;
-import org.junit.Test;
 import org.junit.jupiter.api.BeforeAll;
-import org.openqa.selenium.Dimension;
-import org.openqa.selenium.chrome.ChromeOptions;
+import org.junit.jupiter.api.Test;
 
 import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Selenide.*;

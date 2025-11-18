@@ -1,7 +1,7 @@
 package Lesson14;
 
 import com.github.javafaker.Faker;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import pages.RegistrationPage;
 
 import java.util.Locale;

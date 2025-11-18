@@ -2,6 +2,7 @@ package pages;
 
 import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.SelenideElement;
+import io.qameta.allure.Step;
 import org.openqa.selenium.Keys;
 
 import java.io.File;
@@ -23,8 +24,8 @@ public class RegistrationPage {
             UploadPicture = $("#uploadPicture"),
             currentAddress = $("#currentAddress");
 
+    @Step("Открываем страницу https://demoqa.com/automation-practice-form")
     public RegistrationPage openPage() {
-        Configuration.holdBrowserOpen = true;
         Configuration.pageLoadStrategy = "eager";
         open("https://demoqa.com/automation-practice-form");
         getWebDriver().manage().window().maximize();

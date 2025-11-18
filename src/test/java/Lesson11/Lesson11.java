@@ -1,6 +1,6 @@
 package Lesson11;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 // Основы Java часть 2
 public class Lesson11 {
