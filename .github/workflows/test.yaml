@@ -16,36 +16,21 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      - name: Install Chrome
+      - name: Install Chrome and dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y google-chrome-stable
+          sudo apt-get install -y google-chrome-stable xvfb
           google-chrome --version
 
       - name: Build with Maven
         run: mvn clean compile
 
-      - name: Run tests with detailed reporting
+      - name: Run specific test class with debug
         run: |
-          mvn test \
+          mvn test -Dtest=Lesson12.HomeWorkTest \
             -Dselenide.headless=true \
-            -Dchromeoptions.args="--no-sandbox,--disable-dev-shm-usage,--disable-gpu,--window-size=1920x1080" \
+            -Dchromeoptions.args="--no-sandbox,--disable-dev-shm-usage,--disable-gpu,--window-size=1920x1080,--remote-debugging-port=9222" \
             -Dselenide.browser=chrome \
+            -Dselenide.timeout=10000 \
             -Dsurefire.printSummary=true \
-            -Dsurefire.rerunFailingTestsCount=2
-        continue-on-error: true
-
-      - name: Upload test reports
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-reports
-          path: |
-            target/surefire-reports/
-            target/site/surefire-report.html
-
-      - name: Show test failures
-        if: failure()
-        run: |
-          echo "=== TEST FAILURES ==="
-          find target/surefire-reports -name "*.txt" -exec echo "=== {} ===" \; -exec cat {} \; || true
+            -X
