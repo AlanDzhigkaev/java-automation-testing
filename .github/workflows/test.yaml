@@ -34,6 +34,8 @@ jobs:
           -Dselenide.headless=true \
           -Dselenide.timeout=15000 \
           -Dselenide.pageLoadStrategy=eager \
+          -Dselenide.browserSize=1920x1080 \
+          -Dselenide.browserPosition=0x0 \
           -Dselenide.browserCapabilities.acceptInsecureCerts=true \
           -Dchromeoptions.args="--disable-dev-shm-usage,--no-sandbox,--disable-gpu,--remote-allow-origins=*,--window-size=1920,1080"
 
