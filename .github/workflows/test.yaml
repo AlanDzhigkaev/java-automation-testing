@@ -1,4 +1,4 @@
-name: Java Tests
+name: Java Selenide Tests
 
 on: [push, pull_request]
 
@@ -16,8 +16,20 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
+      - name: Install Chrome and ChromeDriver
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable chromium-chromedriver
+          google-chrome --version
+          which google-chrome
+
       - name: Build with Maven
         run: mvn clean compile
 
-      - name: Run tests with Maven
-        run: mvn test
+      - name: Run tests with Selenide configuration
+        run: |
+          mvn test \
+            -Dselenide.headless=true \
+            -Dchromeoptions.args="--no-sandbox,--disable-dev-shm-usage,--disable-gpu,--remote-debugging-port=9222" \
+            -Dselenide.browser=chrome \
+            -Dwebdriver.chrome.driver=/usr/bin/chromedriver
