@@ -22,14 +22,20 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Run tests with Maven (with system properties)
+      - name: Setup Chrome and ChromeDriver
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: 119
+
+      - name: Run tests with Maven
         run: |
           mvn clean test \
           -Dselenide.browser=chrome \
           -Dselenide.headless=true \
-          -Dselenide.timeout=10000 \
-          -Dwebdriver.chrome.whitelistedIps= \
-          -Dwebdriver.chrome.args="--disable-dev-shm-usage,--no-sandbox,--disable-gpu,--remote-allow-origins=*,--window-size=1920,1080"
+          -Dselenide.timeout=15000 \
+          -Dselenide.pageLoadStrategy=eager \
+          -Dselenide.browserCapabilities.acceptInsecureCerts=true \
+          -Dchromeoptions.args="--disable-dev-shm-usage,--no-sandbox,--disable-gpu,--remote-allow-origins=*,--window-size=1920,1080"
 
       - name: Upload Allure results
         if: always()
