@@ -1,4 +1,4 @@
-name: Simple Test Run
+name: Java Tests with Chrome
 
 on:
   push:
@@ -18,46 +18,51 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      - name: Install Chrome
+      - name: Install Chrome and dependencies
         run: |
           sudo apt-get update
+          sudo apt-get install -y wget
+          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+          echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
+          sudo apt-get update
           sudo apt-get install -y google-chrome-stable
-
-      - name: Run single test to verify setup
-        run: |
-          # Попробуем запустить один простой тест для проверки окружения
-          cat > src/test/java/SimpleTest.java << 'EOF'
-          import org.junit.jupiter.api.Test;
-          import static org.junit.jupiter.api.Assertions.assertTrue;
           
-          public class SimpleTest {
-              @Test
-              void simpleTest() {
-                  assertTrue(true, "This should always pass");
-              }
-          }
+          # Устанавливаем необходимые зависимости для Chrome
+          sudo apt-get install -y libnss3 libatk-bridge2.0-0 libdrm2 libxkbcommon0 \
+            libxcomposite1 libxdamage1 libxrandr2 libgbm1 libasound2
+
+      - name: Verify Chrome installation
+        run: |
+          echo "Chrome version:"
+          google-chrome --version
+          echo "Chrome path:"
+          which google-chrome
+
+      - name: Configure Chrome for tests
+        run: |
+          # Создаем конфигурационный файл для Selenide
+          mkdir -p src/test/resources
+          cat > src/test/resources/selenide.properties << 'EOF'
+          browser=chrome
+          browser.size=1920x1080
+          headless=true
+          browser.version=stable
+          webdriver.logs.enabled=true
+          remote=http://localhost:4444/wd/hub
+          pageLoadStrategy=normal
+          browser.capabilities={\"goog:chromeOptions\":{\"args\":[\"--headless=new\",\"--no-sandbox\",\"--disable-dev-shm-usage\",\"--disable-gpu\",\"--window-size=1920,1080\"]}}
           EOF
-          
-          mvn test -Dtest=SimpleTest -e
 
-      - name: Run actual tests with debug
+      - name: Run tests with proper Chrome configuration
         run: |
-          # Теперь запустим настоящие тесты
-          mvn test -e -Dmaven.test.failure.ignore=true
+          # Запускаем тесты с правильной конфигурацией
+          mvn test -e -Dselenide.browser=chrome \
+                   -Dselenide.headless=true \
+                   -Dchromeoptions.args="--headless=new,--no-sandbox,--disable-dev-shm-usage,--disable-gpu,--window-size=1920,1080" \
+                   -Dmaven.test.failure.ignore=true
 
-      - name: Show specific test failures
+      - name: Show test results
         if: always()
         run: |
-          echo "=== SPECIFIC TEST FAILURES ==="
-          for report in target/surefire-reports/*.txt; do
-            if [ -f "$report" ]; then
-              if grep -q "FAILURE\|ERROR" "$report"; then
-                echo "FAILED: $(basename "$report")"
-                # Показываем только первую ошибку из каждого отчета
-                grep -A 10 "Exception:\|Error:" "$report" | head -20
-                echo "---"
-              else
-                echo "PASSED: $(basename "$report")"
-              fi
-            fi
-          done
+          echo "=== TEST RESULTS ==="
+          find target/surefire-reports -name "*.txt" -exec echo "=== {} ===" \; -exec head -20 {} \;
