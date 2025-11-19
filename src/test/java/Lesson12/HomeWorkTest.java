@@ -1,6 +1,8 @@
 package Lesson12;
 
 import com.codeborne.selenide.Configuration;
+import io.github.bonigarcia.wdm.WebDriverManager;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.*;
@@ -20,6 +22,15 @@ public class HomeWorkTest {
         Configuration.timeout = 10000;
         open("https://demoqa.com/automation-practice-form");
         getWebDriver().manage().window().maximize();
+    }
+
+    @BeforeAll
+    static void setupAll() {
+        WebDriverManager.chromedriver().setup(); // Автоматически скачает нужный ChromeDriver
+        Configuration.browser = "chrome";
+        Configuration.headless = true;
+        Configuration.timeout = 10000;
+        Configuration.pageLoadStrategy = "eager";
     }
 
     @ParameterizedTest(name = "тест для домашней работы №1. @ValueSource. Имя = {0}")
