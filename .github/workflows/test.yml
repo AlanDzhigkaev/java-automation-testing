@@ -3,6 +3,8 @@ name: Java Tests with Compatible Chrome
 on:
   push:
     branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
 
 jobs:
   test:
@@ -17,18 +19,20 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
+          cache: 'maven'
 
-      - name: Remove existing Chrome and install compatible version
+      - name: Install Chrome for Testing
         run: |
-          sudo apt-get remove -y google-chrome-stable || true
-          # Устанавливаем более старую, но совместимую версию Chrome
-          wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-          sudo apt-get install -y ./google-chrome-stable_current_amd64.deb
-          sudo apt-get install -y libasound2t64 libnss3
+          # Используем официальный Chrome for Testing вместо стабильной версии
+          CHROME_VERSION=139.0.7217.0
+          wget -N https://storage.googleapis.com/chrome-for-testing-public/${CHROME_VERSION}/linux64/chrome-linux64.zip
+          unzip -o chrome-linux64.zip
+          sudo mv chrome-linux64/chrome /usr/local/bin/chrome
+          sudo chmod +x /usr/local/bin/chrome
+          sudo ln -sf /usr/local/bin/chrome /usr/bin/google-chrome
 
       - name: Install compatible ChromeDriver
         run: |
-          # Устанавливаем ChromeDriver версии, совместимой с Selenium
           CHROMEDRIVER_VERSION=139.0.7217.0
           wget -N https://storage.googleapis.com/chrome-for-testing-public/${CHROMEDRIVER_VERSION}/linux64/chromedriver-linux64.zip
           unzip -o chromedriver-linux64.zip
@@ -41,6 +45,15 @@ jobs:
           google-chrome --version
           echo "ChromeDriver version:"
           chromedriver --version
+          echo "Java version:"
+          java -version
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
 
       - name: Run tests with explicit ChromeDriver
         run: |
@@ -48,11 +61,4 @@ jobs:
             -Dwebdriver.chrome.driver=/usr/local/bin/chromedriver \
             -Dselenide.browser=chrome \
             -Dselenide.headless=true \
-            -Dchromeoptions.args="--headless=new,--no-sandbox,--disable-dev-shm-usage,--disable-gpu,--window-size=1920,1080,--remote-allow-origins=*,--disable-blink-features=AutomationControlled" \
-            -Dmaven.test.failure.ignore=true
-
-      - name: Show test progress
-        if: always()
-        run: |
-          echo "=== Test Status ==="
-          find target/surefire-reports -name "*.txt" | head -5 | xargs cat | grep -E "Tests run:|Time elapsed:" || echo "No reports yet"
+            -Dchromeoptions.args="--headless=new,--no-sandbox,--
