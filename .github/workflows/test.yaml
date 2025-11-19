@@ -1,4 +1,4 @@
-name: Java Tests with Allure Report
+name: Java Tests
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
 
 jobs:
   test:
-    name: Run Tests and Generate Report
+    name: Run Tests
     runs-on: ubuntu-latest
 
     steps:
@@ -22,26 +22,25 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
+      - name: Setup Chrome and ChromeDriver
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: 119
+
       - name: Run tests with Maven
         run: |
           mvn clean test \
           -Dselenide.browser=chrome \
           -Dselenide.headless=true \
-          -Dselenide.timeout=15000
+          -Dselenide.timeout=15000 \
+          -Dselenide.pageLoadStrategy=eager \
+          -Dselenide.browserCapabilities.acceptInsecureCerts=true \
+          -Dchromeoptions.args="--disable-dev-shm-usage,--no-sandbox,--disable-gpu,--remote-allow-origins=*,--window-size=1920,1080"
 
-      - name: Generate Allure Report
+      - name: Upload Allure results
         if: always()
-        run: mvn allure:report
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v3
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
-          path: target/site/allure-maven-plugin
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v2
-        if: github.ref == 'refs/heads/main'
+          name: allure-results
+          path: target/allure-results/
+          retention-days: 30
