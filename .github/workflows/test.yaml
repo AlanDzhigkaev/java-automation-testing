@@ -1,0 +1,61 @@
+name: Java Tests
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Install Chrome
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+
+      - name: Run tests with Maven
+        run: mvn clean test
+        env:
+          # Настройки для Selenide
+          selenide.browser: chrome
+          selenide.headless: true
+          selenide.timeout: 10000
+
+      - name: Generate Allure Report
+        if: always()
+        uses: simple-elf/allure-report-action@master
+        with:
+          allure_results: target/allure-results
+          allure_report: target/allure-report
+
+      - name: Upload Allure results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results
+          path: target/allure-results/
+          retention-days: 30
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: |
+            target/surefire-reports/
+            target/site/allure-maven-plugin/
+          retention-days: 30
