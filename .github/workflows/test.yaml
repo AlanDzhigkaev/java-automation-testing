@@ -22,25 +22,22 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Install Chrome
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y google-chrome-stable
+      - name: Setup Chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: stable
 
       - name: Run tests with Maven
         run: mvn clean test
         env:
-          # Настройки для Selenide
+          # Настройки для Selenide в CI
           selenide.browser: chrome
           selenide.headless: true
           selenide.timeout: 10000
-
-      - name: Generate Allure Report
-        if: always()
-        uses: simple-elf/allure-report-action@master
-        with:
-          allure_results: target/allure-results
-          allure_report: target/allure-report
+          selenide.pageLoadStrategy: eager
+          # Критически важные настройки для стабильности
+          selenide.remote: null
+          webdriver.chrome.driver: /usr/local/bin/chromedriver
 
       - name: Upload Allure results
         if: always()
@@ -48,14 +45,4 @@ jobs:
         with:
           name: allure-results
           path: target/allure-results/
-          retention-days: 30
-
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-reports
-          path: |
-            target/surefire-reports/
-            target/site/allure-maven-plugin/
           retention-days: 30
