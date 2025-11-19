@@ -22,14 +22,14 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y wget
-          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-          echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
+          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo gpg --dearmor -o /usr/share/keyrings/google-chrome.gpg
+          echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
           sudo apt-get update
           sudo apt-get install -y google-chrome-stable
           
-          # Устанавливаем необходимые зависимости для Chrome
+          # Устанавливаем необходимые зависимости для Chrome (исправленные для Ubuntu 24.04)
           sudo apt-get install -y libnss3 libatk-bridge2.0-0 libdrm2 libxkbcommon0 \
-            libxcomposite1 libxdamage1 libxrandr2 libgbm1 libasound2
+            libxcomposite1 libxdamage1 libxrandr2 libgbm1 libasound2t64
 
       - name: Verify Chrome installation
         run: |
@@ -38,28 +38,14 @@ jobs:
           echo "Chrome path:"
           which google-chrome
 
-      - name: Configure Chrome for tests
-        run: |
-          # Создаем конфигурационный файл для Selenide
-          mkdir -p src/test/resources
-          cat > src/test/resources/selenide.properties << 'EOF'
-          browser=chrome
-          browser.size=1920x1080
-          headless=true
-          browser.version=stable
-          webdriver.logs.enabled=true
-          remote=http://localhost:4444/wd/hub
-          pageLoadStrategy=normal
-          browser.capabilities={\"goog:chromeOptions\":{\"args\":[\"--headless=new\",\"--no-sandbox\",\"--disable-dev-shm-usage\",\"--disable-gpu\",\"--window-size=1920,1080\"]}}
-          EOF
-
       - name: Run tests with proper Chrome configuration
         run: |
           # Запускаем тесты с правильной конфигурацией
-          mvn test -e -Dselenide.browser=chrome \
-                   -Dselenide.headless=true \
-                   -Dchromeoptions.args="--headless=new,--no-sandbox,--disable-dev-shm-usage,--disable-gpu,--window-size=1920,1080" \
-                   -Dmaven.test.failure.ignore=true
+          mvn test -e \
+            -Dselenide.browser=chrome \
+            -Dselenide.headless=true \
+            -Dchromeoptions.args="--headless=new,--no-sandbox,--disable-dev-shm-usage,--disable-gpu,--window-size=1920,1080,--remote-allow-origins=*" \
+            -Dmaven.test.failure.ignore=true
 
       - name: Show test results
         if: always()
