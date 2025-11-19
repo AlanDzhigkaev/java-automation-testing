@@ -19,10 +19,14 @@ jobs:
       - name: Setup Chrome
         uses: browser-actions/setup-chrome@v1
 
-      - name: Run tests with Chrome
+      - name: Run tests with optimized Chrome settings
         run: |
           mvn clean test \
             -Dselenide.headless=true \
             -Dselenide.browser=chrome \
-            -Dselenide.timeout=15000 \
-            -Dselenide.savePageSource=false
+            -Dselenide.timeout=20000 \
+            -Dselenide.pageLoadTimeout=30000 \
+            -Dselenide.pollingInterval=200 \
+            -Dselenide.savePageSource=false \
+            -Dchromeoptions.args="--no-sandbox,--disable-dev-shm-usage,--disable-gpu,--window-size=1920x1080,--disable-extensions,--disable-background-timer-throttling,--disable-renderer-backgrounding,--disable-backgrounding-occluded-windows,--remote-debugging-port=9222" \
+            -Dwebdriver.http.factory=apache
