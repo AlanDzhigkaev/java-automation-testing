@@ -16,17 +16,13 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      - name: Remove Snap Firefox and install via APT
-        run: |
-          sudo snap remove firefox 2>/dev/null || true
-          sudo apt-get update
-          sudo apt-get install -y firefox
-          echo "Firefox path: $(which firefox)"
-          echo "Firefox version: $(firefox --version)"
+      - name: Setup Chrome
+        uses: browser-actions/setup-chrome@v1
 
-      - name: Run tests
+      - name: Run tests with Chrome
         run: |
           mvn clean test \
             -Dselenide.headless=true \
-            -Dselenide.browser=firefox \
-            -Dselenide.timeout=15000
+            -Dselenide.browser=chrome \
+            -Dselenide.timeout=15000 \
+            -Dselenide.savePageSource=false
