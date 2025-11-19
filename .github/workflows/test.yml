@@ -57,13 +57,24 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
-      - name: Run tests with Firefox (обход проблемы Chrome)
+      - name: Clean Chrome processes before tests
         run: |
-          sudo apt-get install -y firefox
+          echo "=== Cleaning Chrome processes ==="
+          pkill -f chrome || true
+          pkill -f chromedriver || true
+          sleep 5
+          rm -rf /tmp/.com.google.Chrome.* || true
+          rm -rf /tmp/chrome-* || true
+          rm -rf /tmp/.org.chromium.Chromium.* || true
+
+      - name: Run tests with Chrome and unique user data dir
+        run: |
           mvn test -e \
-            -Dselenide.browser=firefox \
+            -Dselenide.browser=chrome \
             -Dselenide.headless=true \
             -Dselenide.browserSize=1920x1080 \
+            -Dselenide.pageLoadStrategy=normal \
+            -Dchromeoptions.args="--headless=new,--no-sandbox,--disable-dev-shm-usage,--disable-gpu,--user-data-dir=/tmp/chrome-data-$$" \
             -Dmaven.test.failure.ignore=true
 
       - name: Upload test reports
