@@ -42,7 +42,11 @@ public class StepsTest {
     public void testAnnotatedStep(){
         WebSteps steps = new WebSteps();
         Configuration.pageLoadStrategy = "eager";
-        SelenideLogger.addListener("allure", new AllureSelenide());
+        SelenideLogger.addListener("allure", new AllureSelenide()
+                .screenshots(true)
+                .savePageSource(false)
+                .includeSelenideSteps(false) // ОТКЛЮЧАЕМ запись шагов Selenide
+        );
 
         steps.openMainPage();
         steps.searchForRepository(Repository);

@@ -3,7 +3,9 @@ package Lesson15;
 import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.logevents.SelenideLogger;
 import com.github.javafaker.Faker;
+import io.qameta.allure.Owner;
 import io.qameta.allure.selenide.AllureSelenide;
+import jdk.jfr.DataAmount;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -17,6 +19,7 @@ import static io.qameta.allure.Allure.step;
 public class Homework15Lesson {
 
     @Test
+    @Owner("AlanDzhigkaev")
     @DisplayName("Тест из урока №7 с подключенным Allure Reports")
     public void testHomeWork15(){
         // Правильная настройка Allure Selenide listener
@@ -27,7 +30,6 @@ public class Homework15Lesson {
         );
 
         Faker faker = new Faker();
-        Configuration.holdBrowserOpen = true;
         Configuration.pageLoadStrategy = "eager";
 
         String firstName = faker.name().firstName();
@@ -105,6 +107,47 @@ public class Homework15Lesson {
         step("Нажимаем на кнопку Submit", () -> {
             $("#submit").click();
         });
+    }
 
+    @Test
+    @Owner("AlanDzhigkaev")
+    @DisplayName("Тест с WebSteps")
+    public void testHomeWork15WithWebSteps() {
+        Faker faker = new Faker();
+        WebStepsHomeWork steps = new WebStepsHomeWork();
+
+        Configuration.pageLoadStrategy = "eager";
+        SelenideLogger.addListener("allure", new AllureSelenide());
+
+        String firstName = faker.name().firstName();
+        String lastName = faker.name().lastName();
+        String email = faker.internet().emailAddress();
+        String gender = "Male";
+        String phoneNumer = ("7"+faker.phoneNumber().phoneNumber()
+                .replaceAll("[^0-9]", "")).substring(0, 10);
+        String[] dateOfBirth = {"April","2001","019"};
+        String subject = "Maths";
+        String[] Hobbies = {"Sports","Reading","Music"};
+        String path = "C:/Users/alaniwe/Downloads/ChatGPT.png";
+        String CurrentAddress = faker.address().streetAddress();
+        String state = "NCR";
+        String city = "Delhi";
+
+        steps.openMainPage();
+        steps.setFirstName(firstName);
+        steps.setLastName(lastName);
+        steps.setEmail(email);
+        steps.setGender(gender);
+        steps.setPhoneNumber(phoneNumer);
+        steps.setDateOfBirth(dateOfBirth[0],dateOfBirth[1],dateOfBirth[2]);
+        steps.setSubject(subject);
+        steps.setHobbies(Hobbies[0]);
+        steps.setHobbies(Hobbies[1]);
+        steps.setHobbies(Hobbies[2]);
+        steps.uploadFile(path);
+        steps.setCurrentAddress(CurrentAddress);
+        steps.setState(state);
+        steps.setCity(city);
+        steps.clickSumbit();
     }
 }
