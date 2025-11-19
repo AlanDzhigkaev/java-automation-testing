@@ -22,22 +22,37 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Setup Chrome
-        uses: browser-actions/setup-chrome@v1
-        with:
-          chrome-version: stable
+      - name: Install Chrome and dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget unzip
+          # Установка Chrome
+          wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+          echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+          # Проверка версии Chrome
+          google-chrome --version
+          # Установка ChromeDriver (совместимой версии)
+          CHROME_VERSION=$(google-chrome --version | awk '{print $3}' | cut -d'.' -f1)
+          CHROMEDRIVER_VERSION=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION")
+          wget -q "https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip"
+          unzip -q chromedriver_linux64.zip
+          sudo mv chromedriver /usr/local/bin/
+          sudo chmod +x /usr/local/bin/chromedriver
+          chromedriver --version
 
       - name: Run tests with Maven
         run: mvn clean test
         env:
-          # Настройки для Selenide в CI
+          # Настройки для Selenide
           selenide.browser: chrome
           selenide.headless: true
-          selenide.timeout: 10000
+          selenide.timeout: 15000
           selenide.pageLoadStrategy: eager
-          # Критически важные настройки для стабильности
-          selenide.remote: null
-          webdriver.chrome.driver: /usr/local/bin/chromedriver
+          # Дополнительные настройки для стабильности
+          webdriver.chrome.whitelistedIps: ""
+          webdriver.chrome.args: "--disable-dev-shm-usage,--no-sandbox,--disable-gpu,--remote-allow-origins=*"
 
       - name: Upload Allure results
         if: always()
