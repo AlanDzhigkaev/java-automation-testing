@@ -19,12 +19,13 @@ jobs:
       - name: Install Firefox via Snap
         run: |
           sudo snap install firefox
-          echo "Firefox snap path: /snap/bin/firefox"
+          ls -la /snap/bin/firefox
 
-      - name: Run tests with correct Firefox path
+      - name: Run tests with Firefox path override
         run: |
           mvn clean test \
             -Dselenide.headless=true \
             -Dselenide.browser=firefox \
             -Dwebdriver.firefox.bin=/snap/bin/firefox \
+            -Dfirefox.binary=/snap/bin/firefox \
             -Dselenide.timeout=15000
