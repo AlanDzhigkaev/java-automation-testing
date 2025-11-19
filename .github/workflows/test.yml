@@ -57,9 +57,4 @@ jobs:
 
       - name: Run tests with explicit ChromeDriver
         run: |
-          mvn test -e \
-            -Dwebdriver.chrome.driver=/usr/local/bin/chromedriver \
-            -Dselenide.browser=chrome \
-            -Dselenide.headless=true \
-            -Dchromeoptions.args="--headless=new,--no-sandbox,--disable-dev-shm-usage,--disable-gpu,--window-size=1920,1080,--remote-allow-origins=*,--disable-blink-features=AutomationControlled" \
-            -Dmaven.test.failure.ignore=true
+          mvn test -e -Dselenide.browser=chrome -Dselenide.headless=true -Dmaven.test.failure.ignore=true
