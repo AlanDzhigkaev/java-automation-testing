@@ -16,16 +16,18 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      - name: Install Chromium (совместимый с Selenide 7.10.1)
+      - name: Install Chromium
         run: |
           sudo apt-get update
           sudo apt-get install -y chromium-browser chromium-chromedriver
           echo "Chromium version: $(chromium-browser --version)"
+          echo "ChromeDriver path: $(which chromedriver)"
 
-      - name: Build and test with Chromium
+      - name: Build and test with Chromium as Chrome
         run: |
           mvn clean test \
             -Dselenide.headless=true \
-            -Dselenide.browser=chromium \
+            -Dselenide.browser=chrome \
+            -Dwebdriver.chrome.driver=/usr/bin/chromedriver \
             -Dchromeoptions.binary=/usr/bin/chromium-browser \
-            -Dwebdriver.chrome.driver=/usr/bin/chromedriver
+            -Dchromeoptions.args="--no-sandbox,--disable-dev-shm-usage,--disable-gpu,--window-size=1920x1080"
