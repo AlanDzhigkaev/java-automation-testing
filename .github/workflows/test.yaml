@@ -16,18 +16,17 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      - name: Install compatible Chrome version
+      - name: Install latest Chrome
         run: |
-          # Устанавливаем Chrome 119 который совместим с доступными драйверами
-          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+          sudo apt-get update
+          sudo apt-get install -y wget
+          wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
           echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
           sudo apt-get update
-          sudo apt-get install -y google-chrome-stable=119.0.6045.159-1
-          
-          # Или устанавливаем Chromium
-          # sudo apt-get install -y chromium-browser
+          sudo apt-get install -y google-chrome-stable
+          echo "Chrome version: $(google-chrome --version)"
 
-      - name: Build and test
+      - name: Build and test with WebDriverManager
         run: |
           mvn clean test \
             -Dselenide.headless=true \
