@@ -16,19 +16,16 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      - name: Install latest Chrome
+      - name: Install Chromium (совместимый с Selenide 7.10.1)
         run: |
           sudo apt-get update
-          sudo apt-get install -y wget
-          wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-          echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
-          sudo apt-get update
-          sudo apt-get install -y google-chrome-stable
-          echo "Chrome version: $(google-chrome --version)"
+          sudo apt-get install -y chromium-browser chromium-chromedriver
+          echo "Chromium version: $(chromium-browser --version)"
 
-      - name: Build and test with WebDriverManager
+      - name: Build and test with Chromium
         run: |
           mvn clean test \
             -Dselenide.headless=true \
-            -Dselenide.browser=chrome \
-            -Dchromeoptions.args="--no-sandbox,--disable-dev-shm-usage,--disable-gpu,--window-size=1920x1080"
+            -Dselenide.browser=chromium \
+            -Dchromeoptions.binary=/usr/bin/chromium-browser \
+            -Dwebdriver.chrome.driver=/usr/bin/chromedriver
