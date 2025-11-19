@@ -22,14 +22,18 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
+      - name: Setup Chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: stable
+
+      - name: Verify Chrome installation
+        run: |
+          chrome --version
+          which chrome
+
       - name: Run tests with Maven
         run: mvn clean test
-
-      - name: Show test reports on failure
-        if: failure()
-        run: |
-          echo "=== Surefire Reports ==="
-          find target/surefire-reports -name "*.txt" -exec echo "=== {} ===" \; -exec cat {} \;
 
       - name: Generate Allure Report
         if: always()
@@ -43,3 +47,4 @@ jobs:
           path: |
             target/surefire-reports/
             target/allure-results/
+          retention-days: 30
