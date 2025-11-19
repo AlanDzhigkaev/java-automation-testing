@@ -16,18 +16,18 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      - name: Install Chromium
+      - name: Install Firefox
         run: |
           sudo apt-get update
-          sudo apt-get install -y chromium-browser chromium-chromedriver
-          echo "Chromium version: $(chromium-browser --version)"
-          echo "ChromeDriver path: $(which chromedriver)"
+          sudo apt-get install -y firefox
+          echo "Firefox version: $(firefox --version)"
 
-      - name: Build and test with Chromium as Chrome
+      - name: Build with Maven
+        run: mvn clean compile
+
+      - name: Run tests with Firefox
         run: |
-          mvn clean test \
+          mvn test \
             -Dselenide.headless=true \
-            -Dselenide.browser=chrome \
-            -Dwebdriver.chrome.driver=/usr/bin/chromedriver \
-            -Dchromeoptions.binary=/usr/bin/chromium-browser \
-            -Dchromeoptions.args="--no-sandbox,--disable-dev-shm-usage,--disable-gpu,--window-size=1920x1080"
+            -Dselenide.browser=firefox \
+            -Dselenide.timeout=15000
