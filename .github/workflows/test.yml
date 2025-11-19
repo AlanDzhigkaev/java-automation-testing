@@ -43,24 +43,41 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libasound2t64 libnss3 libxss1 libgbm1
 
-      - name: Clean Chrome processes before tests
+      - name: Verify installations
         run: |
-          pkill -f chrome || true
-          pkill -f chromedriver || true
-          sleep 3
-          rm -rf /tmp/.com.google.Chrome.* || true
-          rm -rf /tmp/chrome-* || true
+          echo "=== Chrome version ==="
+          google-chrome --version
+          echo "=== ChromeDriver version ==="
+          chromedriver --version
 
-      - name: Run tests with Chrome
+      - name: Cache Maven dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Run tests with Firefox (обход проблемы Chrome)
         run: |
+          sudo apt-get install -y firefox
           mvn test -e \
-            -Dselenide.browser=chrome \
+            -Dselenide.browser=firefox \
             -Dselenide.headless=true \
             -Dselenide.browserSize=1920x1080 \
             -Dmaven.test.failure.ignore=true
 
-      - name: Show test results
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: |
+            target/surefire-reports/
+            target/site/surefire-report.html
+          retention-days: 7
+
+      - name: Show test summary
         if: always()
         run: |
-          echo "=== Test Results ==="
-          find target/surefire-reports -name "*.txt" -exec echo "=== {} ===" \; -exec cat {} \; || echo "No test reports found"
+          echo "=== Test Results Summary ==="
+          find target/surefire-reports -name "*.txt" -exec echo "=== {} ===" \; -exec grep -E "Tests run:|Failures:|Errors:|Skipped:" {} \; || echo "No test reports found"
