@@ -22,28 +22,41 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Setup Chrome
-        uses: browser-actions/setup-chrome@v1
-        with:
-          chrome-version: stable
-
-      - name: Verify Chrome installation
+      - name: Install Chrome
         run: |
-          chrome --version
-          which chrome
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
 
-      - name: Run tests with Maven
-        run: mvn clean test
+      - name: Run tests with detailed logging
+        run: |
+          mvn clean test -e -X
+
+      - name: Show test reports
+        if: failure()
+        run: |
+          echo "=== Surefire Reports Content ==="
+          find target/surefire-reports -name "*.txt" | head -5 | while read file; do
+            echo "=== $file ==="
+            cat "$file"
+            echo ""
+          done
+          
+          echo "=== Dump Files ==="
+          find . -name "*.dump" -o -name "*.dumpstream" | while read file; do
+            echo "=== $file ==="
+            cat "$file" 2>/dev/null || echo "No content or cannot read"
+            echo ""
+          done
 
       - name: Generate Allure Report
         if: always()
         run: mvn allure:report
 
-      - name: Upload test reports
+      - name: Upload test artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-reports
+          name: test-details
           path: |
             target/surefire-reports/
             target/allure-results/
