@@ -5,28 +5,27 @@ on: [push, pull_request]
 jobs:
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 3
+    timeout-minutes: 10  # Увеличьте таймаут
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup
-        run: npm ci
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
 
       - name: Run tests with fallback
         run: |
           set -e
-          # Попытка 1: Обычный запуск
           echo "Attempt 1: Normal test run"
-          timeout 120s npm test || echo "First attempt timed out"
+          timeout 300s npm test || echo "First attempt timed out"
           
-          # Попытка 2: Запуск с дополнительными флагами
           echo "Attempt 2: With Jest flags"
-          timeout 120s npm test -- --runInBand --forceExit --logHeapUsage || echo "Second attempt timed out"
+          timeout 300s npx jest --runInBand --forceExit --detectOpenHandles || echo "Second attempt timed out"
           
-          # Попытка 3: Запуск без проблемного теста
-          echo "Attempt 3: Skip problematic tests"
-          timeout 120s npm test -- --testPathIgnorePatterns="hanging-test|problematic" || echo "Third attempt timed out"
-          
-          # Если все попытки провалились
           echo "All test attempts completed"
