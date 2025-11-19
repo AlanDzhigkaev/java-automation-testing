@@ -1,31 +1,29 @@
-name: Tests with Timeout Handling
+name: Java Tests
 
 on: [push, pull_request]
 
 jobs:
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 30
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Set up JDK
+        uses: actions/setup-java@v4
         with:
-          node-version: '18'
-          # Убрали cache: 'npm'
+          java-version: '17'
+          distribution: 'temurin'
 
-      - name: Install dependencies
-        run: npm install
+      - name: Build with Maven
+        run: mvn clean compile
 
-      - name: Run tests with fallback
+      - name: Run tests with Maven
+        run: mvn test
+
+      - name: Run tests with timeout handling
         run: |
           set -e
-          echo "Attempt 1: Normal test run"
-          timeout 300s npm test || echo "First attempt timed out"
-          
-          echo "Attempt 2: With Jest flags"
-          timeout 300s npx jest --runInBand --forceExit --detectOpenHandles || echo "Second attempt timed out"
-          
-          echo "All test attempts completed"
+          echo "Running tests with timeout..."
+          timeout 600s mvn test || echo "Tests timed out after 10 minutes"
