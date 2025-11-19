@@ -18,13 +18,13 @@ jobs:
 
       - name: Install Firefox via Snap
         run: |
-          sudo apt-get update
           sudo snap install firefox
-          echo "Firefox version: $(firefox --version)"
+          echo "Firefox snap path: /snap/bin/firefox"
 
-      - name: Run tests with Firefox
+      - name: Run tests with correct Firefox path
         run: |
           mvn clean test \
             -Dselenide.headless=true \
             -Dselenide.browser=firefox \
+            -Dwebdriver.firefox.bin=/snap/bin/firefox \
             -Dselenide.timeout=15000
