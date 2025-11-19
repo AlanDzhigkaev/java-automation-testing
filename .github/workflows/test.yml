@@ -1,4 +1,4 @@
-name: Java Tests with Compatible Chrome
+name: Java Tests with Chrome
 
 on:
   push:
@@ -23,7 +23,6 @@ jobs:
 
       - name: Install Chrome for Testing
         run: |
-          # Используем официальный Chrome for Testing вместо стабильной версии
           CHROME_VERSION=139.0.7217.0
           wget -N https://storage.googleapis.com/chrome-for-testing-public/${CHROME_VERSION}/linux64/chrome-linux64.zip
           unzip -o chrome-linux64.zip
@@ -39,14 +38,28 @@ jobs:
           sudo mv chromedriver-linux64/chromedriver /usr/local/bin/chromedriver
           sudo chmod +x /usr/local/bin/chromedriver
 
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libasound2 libnss3 libxss1 libgbm1
+
       - name: Verify installations
         run: |
-          echo "Chrome version:"
+          echo "=== Chrome version ==="
           google-chrome --version
-          echo "ChromeDriver version:"
+          echo "=== ChromeDriver version ==="
           chromedriver --version
-          echo "Java version:"
+          echo "=== Java version ==="
           java -version
+
+      - name: Clean Chrome processes before tests
+        run: |
+          echo "=== Cleaning Chrome processes ==="
+          pkill -f chrome || true
+          pkill -f chromedriver || true
+          sleep 3
+          rm -rf /tmp/.com.google.Chrome.* || true
+          rm -rf /tmp/chrome-* || true
 
       - name: Cache Maven dependencies
         uses: actions/cache@v3
@@ -55,6 +68,27 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
-      - name: Run tests with explicit ChromeDriver
+      - name: Run tests with Chrome
         run: |
-          mvn test -e -Dselenide.browser=chrome -Dselenide.headless=true -Dmaven.test.failure.ignore=true
+          mvn test -e \
+            -Dselenide.browser=chrome \
+            -Dselenide.headless=true \
+            -Dselenide.browserSize=1920x1080 \
+            -Dselenide.pageLoadStrategy=normal \
+            -Dmaven.test.failure.ignore=true
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: |
+            target/surefire-reports/
+            target/site/surefire-report.html
+          retention-days: 7
+
+      - name: Show test summary
+        if: always()
+        run: |
+          echo "=== Test Results Summary ==="
+          find target/surefire-reports -name "*.txt" -exec echo "=== {} ===" \; -exec grep -E "Tests run:|Failures:|Errors:|Skipped:" {} \; || echo "No test reports found"
