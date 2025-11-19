@@ -16,16 +16,17 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      - name: Install Firefox via Snap
+      - name: Remove Snap Firefox and install via APT
         run: |
-          sudo snap install firefox
-          ls -la /snap/bin/firefox
+          sudo snap remove firefox 2>/dev/null || true
+          sudo apt-get update
+          sudo apt-get install -y firefox
+          echo "Firefox path: $(which firefox)"
+          echo "Firefox version: $(firefox --version)"
 
-      - name: Run tests with Firefox path override
+      - name: Run tests
         run: |
           mvn clean test \
             -Dselenide.headless=true \
             -Dselenide.browser=firefox \
-            -Dwebdriver.firefox.bin=/snap/bin/firefox \
-            -Dfirefox.binary=/snap/bin/firefox \
             -Dselenide.timeout=15000
