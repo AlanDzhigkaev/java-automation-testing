@@ -16,21 +16,20 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      - name: Install Chrome and dependencies
+      - name: Install compatible Chrome version
         run: |
+          # Устанавливаем Chrome 119 который совместим с доступными драйверами
+          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+          echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
           sudo apt-get update
-          sudo apt-get install -y google-chrome-stable xvfb
-          google-chrome --version
+          sudo apt-get install -y google-chrome-stable=119.0.6045.159-1
+          
+          # Или устанавливаем Chromium
+          # sudo apt-get install -y chromium-browser
 
-      - name: Build with Maven
-        run: mvn clean compile
-
-      - name: Run specific test class with debug
+      - name: Build and test
         run: |
-          mvn test -Dtest=Lesson12.HomeWorkTest \
+          mvn clean test \
             -Dselenide.headless=true \
-            -Dchromeoptions.args="--no-sandbox,--disable-dev-shm-usage,--disable-gpu,--window-size=1920x1080,--remote-debugging-port=9222" \
             -Dselenide.browser=chrome \
-            -Dselenide.timeout=10000 \
-            -Dsurefire.printSummary=true \
-            -X
+            -Dchromeoptions.args="--no-sandbox,--disable-dev-shm-usage,--disable-gpu,--window-size=1920x1080"
