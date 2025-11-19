@@ -1,4 +1,4 @@
-name: Java Tests with Chrome
+name: Java Tests with Selenium Grid
 
 on:
   push:
@@ -43,12 +43,23 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libasound2t64 libnss3 libxss1 libgbm1
 
+      - name: Setup Selenium Grid
+        run: |
+          SELENIUM_VERSION=4.18.1
+          wget -N https://github.com/SeleniumHQ/selenium/releases/download/selenium-$SELENIUM_VERSION/selenium-server-$SELENIUM_VERSION.jar
+          # Запускаем Selenium Grid в фоне
+          java -jar selenium-server-$SELENIUM_VERSION.jar standalone --port 4444 &
+          sleep 15
+          echo "Selenium Grid started on port 4444"
+
       - name: Verify installations
         run: |
           echo "=== Chrome version ==="
           google-chrome --version
           echo "=== ChromeDriver version ==="
           chromedriver --version
+          echo "=== Selenium Grid status ==="
+          curl -s http://localhost:4444/status | jq .value.ready || echo "Selenium Grid not ready"
 
       - name: Cache Maven dependencies
         uses: actions/cache@v3
@@ -57,24 +68,13 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
-      - name: Clean Chrome processes before tests
-        run: |
-          echo "=== Cleaning Chrome processes ==="
-          pkill -f chrome || true
-          pkill -f chromedriver || true
-          sleep 5
-          rm -rf /tmp/.com.google.Chrome.* || true
-          rm -rf /tmp/chrome-* || true
-          rm -rf /tmp/.org.chromium.Chromium.* || true
-
-      - name: Run tests with Chrome and unique user data dir
+      - name: Run tests with Selenium Grid
         run: |
           mvn test -e \
             -Dselenide.browser=chrome \
             -Dselenide.headless=true \
+            -Dselenide.remote=http://localhost:4444/wd/hub \
             -Dselenide.browserSize=1920x1080 \
-            -Dselenide.pageLoadStrategy=normal \
-            -Dchromeoptions.args="--headless=new,--no-sandbox,--disable-dev-shm-usage,--disable-gpu,--user-data-dir=/tmp/chrome-data-$$" \
             -Dmaven.test.failure.ignore=true
 
       - name: Upload test reports
