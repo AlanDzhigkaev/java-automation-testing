@@ -22,37 +22,14 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Install Chrome and dependencies
+      - name: Run tests with Maven (with system properties)
         run: |
-          sudo apt-get update
-          sudo apt-get install -y wget unzip
-          # Установка Chrome
-          wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-          echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
-          sudo apt-get update
-          sudo apt-get install -y google-chrome-stable
-          # Проверка версии Chrome
-          google-chrome --version
-          # Установка ChromeDriver (совместимой версии)
-          CHROME_VERSION=$(google-chrome --version | awk '{print $3}' | cut -d'.' -f1)
-          CHROMEDRIVER_VERSION=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION")
-          wget -q "https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip"
-          unzip -q chromedriver_linux64.zip
-          sudo mv chromedriver /usr/local/bin/
-          sudo chmod +x /usr/local/bin/chromedriver
-          chromedriver --version
-
-      - name: Run tests with Maven
-        run: mvn clean test
-        env:
-          # Настройки для Selenide
-          selenide.browser: chrome
-          selenide.headless: true
-          selenide.timeout: 15000
-          selenide.pageLoadStrategy: eager
-          # Дополнительные настройки для стабильности
-          webdriver.chrome.whitelistedIps: ""
-          webdriver.chrome.args: "--disable-dev-shm-usage,--no-sandbox,--disable-gpu,--remote-allow-origins=*"
+          mvn clean test \
+          -Dselenide.browser=chrome \
+          -Dselenide.headless=true \
+          -Dselenide.timeout=10000 \
+          -Dwebdriver.chrome.whitelistedIps= \
+          -Dwebdriver.chrome.args="--disable-dev-shm-usage,--no-sandbox,--disable-gpu,--remote-allow-origins=*,--window-size=1920,1080"
 
       - name: Upload Allure results
         if: always()
